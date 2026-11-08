@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>婚禮好物分享站｜Just.in Wedding</title>
+<meta name="description" content="婚禮小物贈送與出借，留下 LINE ID 即可申請。Just.in Wedding 佳時婚禮顧問工作室">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fdf5f6; --bg-2:#f9e6ea; --card:#ffffff; --ink:#5b3641; --muted:#a07c87;
+  --rose:#e28fa6; --rose-deep:#b9536f; --line:#f1d9df; --gold:#c8a27c;
+  /* 贈送 = 玫瑰粉、出借 = 薰衣草紫 */
+  --give:#e0869f; --give-deep:#b9536f; --give-soft:#fbe3ea;
+  --lend:#a68bd0; --lend-deep:#7556a6; --lend-soft:#efe7f8;
+  --accent:var(--give); --accent-deep:var(--give-deep); --accent-soft:var(--give-soft);
+  --shadow:0 14px 34px -16px rgba(185,83,111,.35);
+  --radius:22px;
+}
+#zone-give{--accent:var(--give);--accent-deep:var(--give-deep);--accent-soft:var(--give-soft)}
+#zone-lend{--accent:var(--lend);--accent-deep:var(--lend-deep);--accent-soft:var(--lend-soft)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); background:var(--bg);
+  font-family:"Noto Sans TC",system-ui,sans-serif; line-height:1.65;
+  background-image:
+    radial-gradient(900px 500px at 10% -10%, #fbdde5 0%, transparent 60%),
+    radial-gradient(700px 500px at 110% 10%, #fde9e0 0%, transparent 55%),
+    radial-gradient(800px 600px at 50% 120%, #f1e3f3 0%, transparent 60%);
+  background-attachment:fixed;
+  min-height:100vh; overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+button,input,select{font:inherit;color:inherit}
+
+/* falling: petals, sakura, hearts, bouquets */
+.petals{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.fx{position:absolute;top:-70px;animation:fall linear infinite;will-change:transform}
+.fx>span{display:block;width:100%;height:100%;animation:sway ease-in-out infinite alternate}
+.fx svg{display:block;width:100%;height:100%}
+.fx .leaf{display:block;width:100%;height:100%;border-radius:100% 0 100% 0;background:linear-gradient(135deg,#f9cfda,#eba2b8)}
+@keyframes fall{to{transform:translate3d(var(--dx,60px),calc(100vh + 140px),0)}}
+@keyframes sway{from{transform:translateX(-12px) rotate(var(--r0,-30deg))}to{transform:translateX(12px) rotate(var(--r1,40deg))}}
+@media (prefers-reduced-motion:reduce){.petals{display:none}html{scroll-behavior:auto}}
+
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 16px}
+
+/* hero */
+header.hero{text-align:center;padding:64px 0 28px}
+.script{font-family:"Cormorant Garamond",serif;font-style:italic;color:var(--rose-deep);font-size:22px;letter-spacing:.04em}
+h1{font-family:"Noto Serif TC",serif;font-weight:700;font-size:clamp(30px,6vw,46px);margin:6px 0 10px;letter-spacing:.08em;color:var(--ink)}
+.divider{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--gold);margin:6px 0 14px}
+.divider span{height:1px;width:70px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.lead{max-width:520px;margin:0 auto;color:var(--muted);font-size:15px}
+.demo{max-width:560px;margin:18px auto 0;background:#fff7e9;border:1px dashed #e7c79f;color:#8a6a45;
+  padding:8px 14px;border-radius:12px;font-size:13px;display:none}
+
+/* tabs */
+.tabs{display:flex;justify-content:center;margin:26px 0 30px}
+.tabbar{display:inline-flex;background:rgba(255,255,255,.78);backdrop-filter:blur(8px);border:1px solid var(--line);
+  border-radius:999px;padding:6px;box-shadow:var(--shadow)}
+.tab{border:0;background:transparent;cursor:pointer;padding:10px 24px;border-radius:999px;font-weight:500;
+  color:var(--muted);transition:.25s;display:flex;align-items:center;gap:8px;font-size:16px}
+.tab .dot{width:9px;height:9px;border-radius:50%;background:var(--give)}
+.tab .count{font-size:12px;background:var(--give-soft);color:var(--give-deep);border-radius:999px;padding:1px 8px;min-width:24px}
+.tab[data-zone="lend"] .dot{background:var(--lend)}
+.tab[data-zone="lend"] .count{background:var(--lend-soft);color:var(--lend-deep)}
+.tab[aria-selected="true"]{color:#fff;background:linear-gradient(135deg,var(--give),var(--give-deep))}
+.tab[data-zone="lend"][aria-selected="true"]{background:linear-gradient(135deg,var(--lend),var(--lend-deep))}
+.tab[aria-selected="true"] .dot{background:#fff}
+.tab[aria-selected="true"] .count{background:rgba(255,255,255,.25);color:#fff}
+
+/* zone */
+.zone{display:none;animation:fade .45s ease}
+.zone.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.zone-head{text-align:center;margin-bottom:22px}
+.zone-head h2{font-family:"Noto Serif TC",serif;font-size:28px;margin:0;letter-spacing:.1em;color:var(--accent-deep)}
+.zone-head p{margin:6px 0 0;color:var(--muted);font-size:15px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:28px}
+.card{background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);border-top:4px solid var(--accent);
+  box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .25s, box-shadow .25s}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 40px -18px rgba(150,80,120,.45)}
+.photo{position:relative;aspect-ratio:4/3;background:linear-gradient(135deg,var(--accent-soft),#fff);cursor:zoom-in;overflow:hidden}
+.slides{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.slides::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative}
+.slide img{width:100%;height:100%;object-fit:cover}
+.slide .ph{opacity:.6}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:0;padding:0;
+  background:rgba(255,255,255,.88);color:var(--accent-deep);display:grid;place-items:center;cursor:pointer;
+  opacity:0;transition:opacity .2s;box-shadow:0 4px 12px rgba(80,30,50,.15);z-index:2}
+.nav.prev{left:8px}.nav.next{right:8px}
+.photo:hover .nav,.nav:focus-visible{opacity:1}
+@media (hover:none){.nav{opacity:.9}}
+.dots{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2;pointer-events:none}
+.dots i{width:7px;height:7px;border-radius:3px;background:rgba(255,255,255,.65);box-shadow:0 0 3px rgba(0,0,0,.2);transition:.25s}
+.dots i.on{width:18px;background:#fff}
+.counter{position:absolute;top:14px;right:14px;font-size:13px;color:#fff;background:rgba(60,30,45,.45);
+  padding:2px 8px;border-radius:999px;z-index:2;letter-spacing:.05em}
+.photo .ph{position:absolute;inset:0;display:grid;place-items:center;color:var(--accent);opacity:.6}
+.photo.empty{cursor:default}
+.tag{position:absolute;top:14px;left:14px;z-index:2;font-size:13px;font-weight:500;color:#fff;padding:3px 10px;border-radius:999px;
+  background:var(--accent-deep);opacity:.9}
+.body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px;flex:1}
+.name{font-family:"Noto Serif TC",serif;font-weight:500;font-size:21px;margin:0;line-height:1.4}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.qty{font-size:15px;color:var(--muted)}
+.qty b{font-size:24px;color:var(--accent-deep);font-family:"Cormorant Garamond",serif;font-weight:500;margin:0 2px}
+.pick{border:1px solid var(--accent);background:#fff;color:var(--accent-deep);border-radius:999px;padding:9px 20px;
+  font-size:15px;font-weight:500;cursor:pointer;transition:.2s;white-space:nowrap}
+.pick:hover{background:var(--accent);color:#fff}
+.card.out{opacity:.55}
+.card.out .pick{border-color:var(--line);color:var(--muted);cursor:not-allowed;background:#fff}
+
+.empty-zone,.state{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 10px}
+.skeleton{height:300px;border-radius:var(--radius);background:linear-gradient(100deg,#fff 30%,var(--accent-soft) 50%,#fff 70%);
+  background-size:200% 100%;animation:shine 1.4s infinite;border:1px solid var(--line)}
+@keyframes shine{to{background-position:-200% 0}}
+
+/* form */
+.form-card{margin:44px auto 10px;max-width:620px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:28px;padding:30px 26px 26px;box-shadow:var(--shadow);position:relative}
+.form-card::before{content:"";position:absolute;inset:8px;border:1px solid var(--accent-soft);border-radius:22px;pointer-events:none}
+.form-card .script{text-align:center;color:var(--accent-deep)}
+.form-card h3{text-align:center;font-family:"Noto Serif TC",serif;font-size:21px;margin:2px 0 4px;letter-spacing:.1em;color:var(--accent-deep)}
+.form-card .sub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 20px}
+.notice{background:var(--accent-soft);border-radius:16px;padding:14px 16px;margin:0 0 20px;font-size:14px;line-height:1.75;position:relative}
+.notice b{color:var(--accent-deep);font-weight:700}
+.notice .nt{display:flex;align-items:center;gap:6px;font-family:"Noto Serif TC",serif;font-weight:700;color:var(--accent-deep);margin-bottom:4px;letter-spacing:.05em}
+.notice ul{margin:0;padding-left:1.2em}
+.notice li{margin:2px 0}
+.field{margin-bottom:16px;position:relative}
+.field label{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+.field label i{font-style:normal;color:var(--accent-deep)}
+.field input,.field select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;
+  outline:none;transition:.2s;font-size:16px;appearance:none;-webkit-appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b9536f' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+#zone-lend .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237556a6' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hint{font-size:12px;color:var(--muted);margin-top:5px;min-height:18px}
+.submit{width:100%;border:0;cursor:pointer;margin-top:6px;padding:14px;border-radius:999px;color:#fff;font-weight:700;
+  font-size:16px;letter-spacing:.2em;background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+  box-shadow:0 10px 24px -10px var(--accent-deep);transition:.2s}
+.submit:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.submit:disabled{opacity:.6;cursor:wait;transform:none}
+
+footer{text-align:center;color:var(--muted);font-size:13px;padding:48px 0 56px}
+footer .brand{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:26px;color:var(--rose-deep);letter-spacing:.03em;line-height:1.2}
+footer .studio{font-family:"Noto Serif TC",serif;letter-spacing:.3em;color:var(--ink);margin-top:4px;font-size:14px}
+
+/* toast & lightbox */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,30px);opacity:0;z-index:20;pointer-events:none;
+  background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:14px 20px;
+  display:flex;gap:10px;align-items:center;transition:.35s;max-width:calc(100% - 32px);font-size:14px}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.bad{border-color:#f0b8c4}
+.lightbox{position:fixed;inset:0;background:rgba(70,35,45,.82);display:none;place-items:center;z-index:30;padding:20px 64px}
+.lightbox.open{display:grid}
+.lightbox figure{margin:0;max-width:100%}
+.lightbox img{max-height:80vh;max-width:100%;margin:0 auto;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);user-select:none}
+.lightbox p{color:#fff;text-align:center;margin:12px 0 0;font-family:"Noto Serif TC",serif}
+.lightbox p small{display:block;font-family:"Noto Sans TC",sans-serif;opacity:.75;margin-top:2px}
+.lb-btn{position:absolute;border:0;background:rgba(255,255,255,.16);color:#fff;width:44px;height:44px;border-radius:50%;
+  display:grid;place-items:center;cursor:pointer;transition:.2s}
+.lb-btn:hover{background:rgba(255,255,255,.3)}
+.lb-prev{left:12px;top:50%;transform:translateY(-50%)}
+.lb-next{right:12px;top:50%;transform:translateY(-50%)}
+.lb-close{right:14px;top:14px}
+.lightbox.single .lb-prev,.lightbox.single .lb-next{display:none}
+@media (max-width:560px){.lightbox{padding:20px 10px}.lb-prev,.lb-next{top:auto;bottom:18px;transform:none}}
+
+@media (max-width:560px){
+  header.hero{padding-top:44px}
+  .wrap{padding:0 12px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .card{border-radius:18px}
+  .body{padding:12px 12px 14px;gap:8px}
+  .name{font-size:17px}
+  .meta{flex-direction:column;align-items:stretch;gap:8px}
+  .qty{font-size:14px}
+  .qty b{font-size:22px}
+  .pick{padding:9px 10px;font-size:15px;text-align:center}
+  .tag{top:10px;left:10px;font-size:12px;padding:2px 9px}
+  .counter{top:10px;right:10px;font-size:12px}
+  .nav{width:30px;height:30px}
+  .nav.prev{left:6px}.nav.next{right:6px}
+  .zone-head h2{font-size:26px}
+  .zone-head p{font-size:14px}
+  .notice{font-size:15px}
+  .row{grid-template-columns:1fr}
+  .tab{padding:9px 16px}
+  .form-card{padding:26px 18px 20px}
+}
+</style>
+</head>
+<body>
+<div class="petals" id="petals" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="script">With love, pass it on</div>
+    <h1>婚禮好物分享站</h1>
+    <div class="divider"><span></span>
+      <svg width="16" height="14" viewBox="0 0 24 21" fill="currentColor" aria-hidden="true"><path d="M12 21s-9-5.6-9-12.2C3 4.4 6 2 9 2c1.6 0 2.4.8 3 1.7C12.6 2.8 13.4 2 15 2c3 0 6 2.4 6 6.8C21 15.4 12 21 12 21z"/></svg>
+    <span></span></div>
+    <p class="lead">曾經陪伴幸福時刻的婚禮小物，希望能繼續延續下一份浪漫。<br>挑選喜歡的項目，留下 LINE ID，我們會盡快與你聯繫。</p>
+    <div class="demo" id="demo">目前是預覽模式，顯示的是範例資料。設定好 Apps Script 網址後，就會讀取試算表的內容。</div>
+  </header>
+
+  <nav class="tabs">
+    <div class="tabbar" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-zone="give"><i class="dot"></i>贈送區 <span class="count" id="c-give">–</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-zone="lend"><i class="dot"></i>出借區 <span class="count" id="c-lend">–</span></button>
+    </div>
+  </nav>
+
+  <!-- 贈送區 -->
+  <section class="zone active" id="zone-give">
+    <div class="zone-head">
+      <h2>贈 送 區</h2>
+      <p>0 元結緣，只需負擔運費或選擇面交｜數量有限，送完為止</p>
+    </div>
+    <div class="grid" id="grid-give"></div>
+
+    <form class="form-card" id="form-give" data-type="贈送" novalidate>
+      <div class="script">Request</div>
+      <h3>索取申請</h3>
+      <p class="sub">送出後我們會透過 LINE 與你確認領取方式</p>
+      <div class="notice">
+        <div class="nt"><svg width="14" height="12" viewBox="0 0 24 21" fill="currentColor" aria-hidden="true"><path d="M12 21s-9-5.6-9-12.2C3 4.4 6 2 9 2c1.6 0 2.4.8 3 1.7C12.6 2.8 13.4 2 15 2c3 0 6 2.4 6 6.8C21 15.4 12 21 12 21z"/></svg>0 元結緣・送給即將舉辦婚禮的新人</div>
+        <ul>
+          <li>贈送區的物品全部免費，只需負擔 7-ELEVEN 賣貨便運費 <b>NT$58</b>。</li>
+          <li>也可以選擇<b>面交</b>，免運費。</li>
+        </ul>
+      </div>
+      <div class="field">
+        <label for="give-line">LINE ID <i>*</i></label>
+        <input id="give-line" name="lineId" placeholder="例如：wedding_love" autocomplete="off" maxlength="60">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="give-item">項目名稱 <i>*</i></label>
+          <select id="give-item" name="itemId"></select>
+        </div>
+        <div class="field">
+          <label for="give-qty">數量 <i>*</i></label>
+          <input id="give-qty" name="qty" type="number" min="1" step="1" inputmode="numeric" value="1">
+          <div class="hint" data-hint></div>
+        </div>
+      </div>
+      <button class="submit" type="submit">申　請</button>
+    </form>
+  </section>
+
+  <!-- 出借區 -->
+  <section class="zone" id="zone-lend">
+    <div class="zone-head">
+      <h2>出 借 區</h2>
+      <p>0 元租借的佈置與道具｜婚宴結束後一週內寄回即可</p>
+    </div>
+    <div class="grid" id="grid-lend"></div>
+
+    <form class="form-card" id="form-lend" data-type="出借" novalidate>
+      <div class="script">Borrow</div>
+      <h3>借用申請</h3>
+      <p class="sub">送出後我們會透過 LINE 與你確認時間與交接方式</p>
+      <div class="notice">
+        <div class="nt"><svg width="14" height="12" viewBox="0 0 24 21" fill="currentColor" aria-hidden="true"><path d="M12 21s-9-5.6-9-12.2C3 4.4 6 2 9 2c1.6 0 2.4.8 3 1.7C12.6 2.8 13.4 2 15 2c3 0 6 2.4 6 6.8C21 15.4 12 21 12 21z"/></svg>0 元租借・獻給即將舉辦婚禮的新人</div>
+        <ul>
+          <li>出借區的物品不收任何租借費用。</li>
+          <li>婚宴結束後，請於<b>一週內</b>寄回給賈斯丁（Justin）。</li>
+        </ul>
+      </div>
+      <div class="field">
+        <label for="lend-line">LINE ID <i>*</i></label>
+        <input id="lend-line" name="lineId" placeholder="例如：wedding_love" autocomplete="off" maxlength="60">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="lend-item">項目名稱 <i>*</i></label>
+          <select id="lend-item" name="itemId"></select>
+        </div>
+        <div class="field">
+          <label for="lend-qty">數量 <i>*</i></label>
+          <input id="lend-qty" name="qty" type="number" min="1" step="1" inputmode="numeric" value="1">
+          <div class="hint" data-hint></div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="lend-date">出借日期 <i>*</i></label>
+        <input id="lend-date" name="date" type="date">
+      </div>
+      <button class="submit" type="submit">申　請</button>
+    </form>
+  </section>
+
+  <footer>
+    <div class="divider"><span></span>
+      <svg width="14" height="12" viewBox="0 0 24 21" fill="currentColor" aria-hidden="true"><path d="M12 21s-9-5.6-9-12.2C3 4.4 6 2 9 2c1.6 0 2.4.8 3 1.7C12.6 2.8 13.4 2 15 2c3 0 6 2.4 6 6.8C21 15.4 12 21 12 21z"/></svg>
+    <span></span></div>
+    <div class="brand">Just.in Wedding</div>
+    <div class="studio">佳時婚禮顧問工作室</div>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="照片">
+  <figure><img alt=""><p></p></figure>
+  <button class="lb-btn lb-prev" type="button" aria-label="上一張"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="lb-btn lb-next" type="button" aria-label="下一張"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button class="lb-btn lb-close" type="button" aria-label="關閉"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
+
+<script>
+/* ===== 設定：Apps Script「網頁應用程式」網址（結尾是 /exec） ===== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzpkHmzJBhb9UM7V52jcuciriL3rgkR2DbnZgxp9hAsTp0yPJmC8wRr89fCl0aRWmtM/exec';
+/* =================================================================== */
+
+const demoPhoto = (c1, c2, t) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>" +
+  "<stop offset='0' stop-color='"+c1+"'/><stop offset='1' stop-color='"+c2+"'/></linearGradient></defs>" +
+  "<rect width='800' height='600' fill='url(#g)'/><text x='400' y='318' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif'>"+t+"</text></svg>");
+const DEMO_ITEMS = [
+  {id:'001',type:'贈送',name:'玻璃許願瓶',qty:12,photos:[demoPhoto('#f6c1cf','#e98aa5','範例照片 1'),demoPhoto('#f9d6c9','#ee9fae','範例照片 2'),demoPhoto('#f3c7df','#d98bb6','範例照片 3')]},
+  {id:'002',type:'贈送',name:'乾燥花束（粉色系）',qty:5,photos:[demoPhoto('#fbd3dc','#f0a3b7','範例照片')]},
+  {id:'003',type:'贈送',name:'喜糖小紙盒',qty:80,photos:[]},
+  {id:'004',type:'贈送',name:'婚禮蠟燭杯',qty:0,photos:[]},
+  {id:'005',type:'出借',name:'迎賓木製畫架',qty:2,photos:[demoPhoto('#dccbf0','#a68bd0','範例照片 1'),demoPhoto('#e7d9f5','#b79ad9','範例照片 2')]},
+  {id:'006',type:'出借',name:'金色鐵藝拱門',qty:1,photos:[]},
+  {id:'007',type:'出借',name:'LED 燈串（10 米）',qty:6,photos:[]},
+];
+
+const ZONES = {give:'贈送', lend:'出借'};
+let items = [];
+
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const heart = '<svg width="34" height="30" viewBox="0 0 24 21" fill="currentColor"><path d="M12 21s-9-5.6-9-12.2C3 4.4 6 2 9 2c1.6 0 2.4.8 3 1.7C12.6 2.8 13.4 2 15 2c3 0 6 2.4 6 6.8C21 15.4 12 21 12 21z"/></svg>';
+
+/* falling: petals, sakura, hearts, bouquets */
+(function(){
+  const box = $('#petals');
+  const rnd = (a,b) => a + Math.random()*(b-a);
+  const pick = a => a[Math.floor(Math.random()*a.length)];
+  const pinks = ['#f7b6c8','#f4a6bc','#f9cdd8','#eea0b6','#fbd5df'];
+  const sakura = c => '<svg viewBox="-10 -10 20 20"><g fill="'+c+'">' +
+    [0,72,144,216,288].map(a => '<path transform="rotate('+a+')" d="M0 0C-3.2-2-3.6-6.2-1.3-8.8L0-7.4 1.3-8.8C3.6-6.2 3.2-2 0 0Z"/>').join('') +
+    '</g><circle r="1.5" fill="#e98aa5"/></svg>';
+  const heartSvg = c => '<svg viewBox="0 0 24 21"><path fill="'+c+'" d="M12 21s-9-5.6-9-12.2C3 4.4 6 2 9 2c1.6 0 2.4.8 3 1.7C12.6 2.8 13.4 2 15 2c3 0 6 2.4 6 6.8C21 15.4 12 21 12 21z"/></svg>';
+  const bouquet = () => '<svg viewBox="0 0 24 30"><path d="M12 27L8 13M12 27V11M12 27L16 13" stroke="#9fbf9b" stroke-width="1.2" fill="none"/>' +
+    '<path d="M6.5 15L12 29L17.5 15Z" fill="#fff1f4" stroke="#e8b0c1" stroke-width=".8"/>' +
+    '<circle cx="7.8" cy="10" r="3.4" fill="#f4a6bc"/><circle cx="16.2" cy="10" r="3.4" fill="#d9c4ee"/>' +
+    '<circle cx="12" cy="6.8" r="3.8" fill="#e98aa5"/><circle cx="12" cy="6.8" r="1.2" fill="#fff3cf"/>' +
+    '<path d="M11 20.5l-3.4 2.2 3.2.4zM13 20.5l3.4 2.2-3.2.4z" fill="#d9748f"/><circle cx="12" cy="20.6" r="1.1" fill="#d9748f"/></svg>';
+  const kinds = [
+    {w:36, size:[10,16], ratio:.85, op:[.45,.7], make:() => '<i class="leaf"></i>'},
+    {w:30, size:[14,22], ratio:1,   op:[.6,.9],  make:() => sakura(pick(pinks))},
+    {w:22, size:[10,18], ratio:.9,  op:[.45,.75],make:() => heartSvg(pick(['#f4a6bc','#e98aa5','#f7c0cf','#c9a7e0']))},
+    {w:12, size:[22,30], ratio:1.25,op:[.75,.95],make:bouquet},
+  ];
+  const total = kinds.reduce((a,k) => a + k.w, 0);
+  const choose = () => { let r = Math.random()*total; for (const k of kinds){ if ((r -= k.w) < 0) return k; } return kinds[0]; };
+  const n = window.innerWidth < 600 ? 22 : 38;
+  for (let i = 0; i < n; i++){
+    const k = choose(), size = rnd(k.size[0], k.size[1]);
+    const fx = document.createElement('div');
+    fx.className = 'fx';
+    fx.style.cssText = 'left:'+rnd(-5,100)+'%;width:'+size+'px;height:'+(size*k.ratio)+'px;opacity:'+rnd(k.op[0],k.op[1])+
+      ';animation-duration:'+rnd(11,24)+'s;animation-delay:'+(-rnd(0,24))+'s;--dx:'+rnd(-60,120)+'px';
+    const inner = document.createElement('span');
+    inner.style.cssText = 'animation-duration:'+rnd(2.2,4.5)+'s;animation-delay:'+(-rnd(0,4))+'s;--r0:'+rnd(-50,-10)+'deg;--r1:'+rnd(15,60)+'deg';
+    inner.innerHTML = k.make();
+    fx.appendChild(inner);
+    box.appendChild(fx);
+  }
+})();
+
+/* tabs */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchZone(t.dataset.zone)));
+function switchZone(z){
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.zone === z));
+  document.querySelectorAll('.zone').forEach(s => s.classList.toggle('active', s.id === 'zone-'+z));
+}
+
+/* load */
+async function load(){
+  ['give','lend'].forEach(z => $('#grid-'+z).innerHTML = '<div class="skeleton"></div>'.repeat(3));
+  if (!API_URL){ $('#demo').style.display = 'block'; items = DEMO_ITEMS; render(); return; }
+  try{
+    const r = await fetch(API_URL + '?action=items');
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || '讀取失敗');
+    items = j.items || [];
+    render();
+  }catch(e){
+    ['give','lend'].forEach(z => $('#grid-'+z).innerHTML = '<div class="state">資料暫時讀取不到，請稍後重新整理頁面。</div>');
+    console.error(e);
+  }
+}
+
+function render(){
+  for (const [z, type] of Object.entries(ZONES)){
+    const list = items.filter(i => i.type === type);
+    $('#c-'+z).textContent = list.filter(i => i.qty > 0).length;
+    const grid = $('#grid-'+z);
+    grid.innerHTML = list.length ? list.map(i => card(i, z)).join('') : '<div class="empty-zone">目前還沒有'+type+'的項目</div>';
+
+    const avail = list.filter(i => i.qty > 0);
+    $('#'+z+'-item').innerHTML = '<option value="">請選擇項目</option>' +
+      avail.map(i => '<option value="'+esc(i.id)+'">'+esc(i.name)+'</option>').join('');
+    updateQtyHint(z);
+  }
+  document.querySelectorAll('.slide img').forEach(img => img.addEventListener('error', () => {
+    const sl = img.parentElement; img.remove(); sl.classList.add('broken');
+    sl.insertAdjacentHTML('afterbegin', '<div class="ph">'+heart+'</div>');
+  }));
+  document.querySelectorAll('.photo.multi').forEach(setupCarousel);
+}
+
+/* ---- carousel ---- */
+const seen = new WeakMap();
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => seen.set(e.target, e.isIntersecting)), {threshold:.6}) : null;
+function photosOf(i){ return (i.photos && i.photos.length) ? i.photos : (i.photo ? [i.photo] : []); }
+function slideIndex(ph){ const sl = $('.slides', ph); return Math.round(sl.scrollLeft / Math.max(1, sl.clientWidth)); }
+function goSlide(ph, k, smooth=true){
+  const sl = $('.slides', ph), n = sl.children.length;
+  k = (k + n) % n;
+  sl.scrollTo({left: k * sl.clientWidth, behavior: smooth ? 'smooth' : 'auto'});
+}
+function setupCarousel(ph){
+  const sl = $('.slides', ph), n = sl.children.length;
+  const dots = ph.querySelectorAll('.dots i'), counter = $('.counter', ph);
+  let raf;
+  sl.addEventListener('scroll', () => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const k = slideIndex(ph);
+      dots.forEach((d, j) => d.classList.toggle('on', j === k));
+      if (counter) counter.textContent = (k+1) + ' / ' + n;
+    });
+  }, {passive:true});
+  const hold = () => ph.dataset.hold = Date.now() + 8000;
+  ph.addEventListener('pointerenter', () => ph.dataset.hover = '1');
+  ph.addEventListener('pointerleave', () => { delete ph.dataset.hover; });
+  sl.addEventListener('touchstart', hold, {passive:true});
+  if (io) io.observe(ph); else seen.set(ph, true);
+}
+/* autoplay: every 4.5s, only visible carousels in the active zone, paused on hover/touch */
+setInterval(() => {
+  if (document.hidden || $('#lightbox').classList.contains('open')) return;
+  document.querySelectorAll('.zone.active .photo.multi').forEach(ph => {
+    if (!seen.get(ph) || ph.dataset.hover || (+ph.dataset.hold || 0) > Date.now()) return;
+    goSlide(ph, slideIndex(ph) + 1);
+  });
+}, 4500);
+
+function card(i, z){
+  const out = i.qty <= 0;
+  const action = z === 'give' ? '我想索取' : '我想借用';
+  const outText = z === 'give' ? '已全數送出' : '暫時借出中';
+  const ps = photosOf(i), multi = ps.length > 1;
+  const chev = d => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="'+d+'"/></svg>';
+  const media = !ps.length
+    ? '<div class="ph">'+heart+'</div>'
+    : '<div class="slides">' + ps.map((u, k) =>
+        '<div class="slide" data-k="'+k+'"><img src="'+esc(u)+'" alt="'+esc(i.name)+(multi?' 第 '+(k+1)+' 張':'')+'" loading="lazy" referrerpolicy="no-referrer" draggable="false"></div>'
+      ).join('') + '</div>' +
+      (multi
+        ? '<button class="nav prev" type="button" aria-label="上一張">'+chev('M15 5l-7 7 7 7')+'</button>' +
+          '<button class="nav next" type="button" aria-label="下一張">'+chev('M9 5l7 7-7 7')+'</button>' +
+          '<span class="counter">1 / '+ps.length+'</span>' +
+          (ps.length <= 8 ? '<div class="dots">' + ps.map((_, k) => '<i'+(k===0?' class="on"':'')+'></i>').join('') + '</div>' : '')
+        : '');
+  return '<article class="card'+(out?' out':'')+'">' +
+    '<div class="photo'+(ps.length?'':' empty')+(multi?' multi':'')+'" data-zone="'+z+'" data-id="'+esc(i.id)+'">' +
+      media + '<span class="tag">'+ZONES[z]+'</span></div>' +
+    '<div class="body"><h4 class="name">'+esc(i.name)+'</h4>' +
+      '<div class="meta"><span class="qty">'+(z==='give'?'可索取':'可借用')+'<b>'+i.qty+'</b>件</span>' +
+      '<button class="pick" type="button" data-zone="'+z+'" data-id="'+esc(i.id)+'"'+(out?' disabled':'')+'>'+(out?outText:action)+'</button>' +
+    '</div></div></article>';
+}
+
+/* card -> form prefill, photo -> lightbox */
+document.addEventListener('click', e => {
+  const b = e.target.closest('.pick');
+  if (b && !b.disabled){
+    const z = b.dataset.zone;
+    $('#'+z+'-item').value = b.dataset.id; updateQtyHint(z);
+    $('#form-'+z).scrollIntoView({behavior:'smooth', block:'center'});
+    setTimeout(() => $('#'+z+'-line').focus({preventScroll:true}), 450);
+    return;
+  }
+  const nav = e.target.closest('.nav');
+  if (nav){
+    const ph = nav.closest('.photo');
+    ph.dataset.hold = Date.now() + 8000;
+    goSlide(ph, slideIndex(ph) + (nav.classList.contains('next') ? 1 : -1));
+    return;
+  }
+  const slide = e.target.closest('.slide');
+  if (slide && !slide.classList.contains('broken')){
+    const ph = slide.closest('.photo');
+    const it = items.find(x => x.id === ph.dataset.id && x.type === ZONES[ph.dataset.zone]);
+    if (it) openLightbox(it, slideIndex(ph));
+  }
+});
+
+/* ---- lightbox gallery ---- */
+const lb = $('#lightbox');
+let lbItem = null, lbIdx = 0;
+function openLightbox(it, k){
+  lbItem = it; lbIdx = k;
+  lb.classList.toggle('single', photosOf(it).length < 2);
+  showLb(); lb.classList.add('open');
+}
+function showLb(){
+  const ps = photosOf(lbItem), n = ps.length;
+  lbIdx = (lbIdx + n) % n;
+  $('img', lb).src = ps[lbIdx].replace(/sz=w\d+/, 'sz=w1600');
+  $('img', lb).alt = lbItem.name;
+  $('p', lb).innerHTML = esc(lbItem.name) + (n > 1 ? '<small>' + (lbIdx+1) + ' / ' + n + '</small>' : '');
+}
+const closeLb = () => lb.classList.remove('open');
+lb.addEventListener('click', e => {
+  if (e.target.closest('.lb-prev')){ lbIdx--; showLb(); return; }
+  if (e.target.closest('.lb-next') || (e.target.tagName === 'IMG' && photosOf(lbItem).length > 1)){ lbIdx++; showLb(); return; }
+  if (e.target.closest('.lb-close') || e.target === lb || e.target.tagName === 'FIGURE') closeLb();
+});
+let tx = null;
+lb.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+lb.addEventListener('touchend', e => {
+  if (tx === null) return;
+  const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if (Math.abs(dx) > 40 && photosOf(lbItem).length > 1){ lbIdx += dx < 0 ? 1 : -1; showLb(); }
+});
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLb();
+  else if (e.key === 'ArrowRight'){ lbIdx++; showLb(); }
+  else if (e.key === 'ArrowLeft'){ lbIdx--; showLb(); }
+});
+
+function findItem(z){ const id = $('#'+z+'-item').value; return items.find(i => i.id === id && i.type === ZONES[z]); }
+function updateQtyHint(z){
+  const it = findItem(z), q = $('#'+z+'-qty'), h = $('[data-hint]', $('#form-'+z));
+  if (it){ q.max = it.qty; h.textContent = '最多可'+(z==='give'?'索取':'借用')+' '+it.qty+' 件'; }
+  else { q.removeAttribute('max'); h.textContent = ''; }
+}
+['give','lend'].forEach(z => $('#'+z+'-item').addEventListener('change', () => updateQtyHint(z)));
+
+/* date: earliest today */
+(function(){
+  const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  $('#lend-date').min = d.toISOString().slice(0,10);
+})();
+
+/* submit */
+['give','lend'].forEach(z => $('#form-'+z).addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.currentTarget, btn = $('.submit', f);
+  const lineId = $('#'+z+'-line').value.trim();
+  const it = findItem(z);
+  const qty = parseInt($('#'+z+'-qty').value, 10);
+  const date = z === 'lend' ? $('#lend-date').value : '';
+
+  if (!lineId) return toast('請填寫 LINE ID', true, '#'+z+'-line');
+  if (!it) return toast('請選擇項目名稱', true, '#'+z+'-item');
+  if (!(qty >= 1)) return toast('數量至少為 1', true, '#'+z+'-qty');
+  if (qty > it.qty) return toast('「'+it.name+'」最多只有 '+it.qty+' 件', true, '#'+z+'-qty');
+  if (z === 'lend' && !date) return toast('請選擇出借日期', true, '#lend-date');
+  if (z === 'lend' && date < $('#lend-date').min) return toast('出借日期不能早於今天', true, '#lend-date');
+
+  const payload = {type: ZONES[z], lineId, itemId: it.id, itemName: it.name, qty, date};
+  btn.disabled = true; btn.textContent = '送出中…';
+  try{
+    if (!API_URL){ await new Promise(r => setTimeout(r, 700)); }
+    else {
+      const r = await fetch(API_URL, {method:'POST', body: JSON.stringify(payload)});
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || '送出失敗');
+    }
+    f.reset(); $('#'+z+'-qty').value = 1; updateQtyHint(z);
+    toast('已收到你的'+(z==='give'?'索取':'借用')+'申請，我們會透過 LINE 與你聯繫', false, null, z);
+  }catch(err){
+    toast(err.message || '送出失敗，請稍後再試', true);
+  }finally{
+    btn.disabled = false; btn.textContent = '申　請';
+  }
+}));
+
+let tt;
+function toast(msg, bad=false, focusSel, z){
+  const t = $('#toast');
+  const color = bad ? '#c2415f' : (z === 'lend' ? 'var(--lend-deep)' : 'var(--give-deep)');
+  t.innerHTML = '<span style="color:'+color+'">'+heart.replace('width="34" height="30"','width="18" height="16"')+'</span><span>'+esc(msg)+'</span>';
+  t.classList.toggle('bad', bad); t.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), bad ? 3000 : 4500);
+  if (focusSel) $(focusSel).focus();
+}
+
+load();
+</script>
+</body>
+</html>
