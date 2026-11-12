@@ -43,7 +43,9 @@ button,input,select{font:inherit;color:inherit}
 .fx svg{display:block;width:100%;height:100%}
 .fx .leaf{display:block;width:100%;height:100%;border-radius:100% 0 100% 0;background:linear-gradient(135deg,#f9cfda,#eba2b8)}
 @keyframes fall{to{transform:translate3d(var(--dx,60px),calc(100vh + 140px),0)}}
-@keyframes sway{from{transform:translateX(-12px) rotate(var(--r0,-30deg))}to{transform:translateX(12px) rotate(var(--r1,40deg))}}
+.fx.up{top:auto;bottom:-70px;animation-name:rise}
+@keyframes rise{to{transform:translate3d(var(--dx,30px),calc(-100vh - 140px),0)}}
+@keyframes sway{from{transform:translateX(calc(var(--sw,12px) * -1)) rotate(var(--r0,-30deg))}to{transform:translateX(var(--sw,12px)) rotate(var(--r1,40deg))}}
 @media (prefers-reduced-motion:reduce){.petals{display:none}html{scroll-behavior:auto}}
 
 .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 16px}
@@ -372,11 +374,16 @@ const heart = '<svg width="34" height="30" viewBox="0 0 24 21" fill="currentColo
   for (let i = 0; i < n; i++){
     const k = choose(), size = rnd(k.size[0], k.size[1]);
     const fx = document.createElement('div');
-    fx.className = 'fx';
+    const leaf = k === kinds[0];
+    const up = !leaf && Math.random() < .45;          // 櫻花、愛心、花束：約一半往上飄
+    fx.className = 'fx' + (up ? ' up' : '');
+    const dur = up ? rnd(16,28) : rnd(12,24);
     fx.style.cssText = 'left:'+rnd(-5,100)+'%;width:'+size+'px;height:'+(size*k.ratio)+'px;opacity:'+rnd(k.op[0],k.op[1])+
-      ';animation-duration:'+rnd(11,24)+'s;animation-delay:'+(-rnd(0,24))+'s;--dx:'+rnd(-60,120)+'px';
+      ';animation-duration:'+dur+'s;animation-delay:'+(-rnd(0,dur))+'s;--dx:'+(leaf ? rnd(-60,120) : rnd(-40,40))+'px';
     const inner = document.createElement('span');
-    inner.style.cssText = 'animation-duration:'+rnd(2.2,4.5)+'s;animation-delay:'+(-rnd(0,4))+'s;--r0:'+rnd(-50,-10)+'deg;--r1:'+rnd(15,60)+'deg';
+    inner.style.cssText = leaf
+      ? 'animation-duration:'+rnd(2.2,4.5)+'s;animation-delay:'+(-rnd(0,4))+'s;--r0:'+rnd(-50,-10)+'deg;--r1:'+rnd(15,60)+'deg'
+      : 'animation-duration:'+rnd(2.8,4.8)+'s;animation-delay:'+(-rnd(0,4))+'s;--sw:'+rnd(10,20)+'px;--r0:'+rnd(-16,-6)+'deg;--r1:'+rnd(6,16)+'deg';
     inner.innerHTML = k.make();
     fx.appendChild(inner);
     box.appendChild(fx);
