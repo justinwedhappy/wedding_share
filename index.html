@@ -111,6 +111,8 @@ h1{font-family:"Noto Serif TC",serif;font-weight:700;font-size:clamp(30px,6vw,46
   background:var(--accent-deep);opacity:.9}
 .body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px;flex:1}
 .name{font-family:"Noto Serif TC",serif;font-weight:500;font-size:21px;margin:0;line-height:1.4}
+.note{margin:-6px 0 0;font-size:14px;color:var(--muted);line-height:1.55;white-space:pre-line;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
 .qty{font-size:15px;color:var(--muted)}
 .qty b{font-size:24px;color:var(--accent-deep);font-family:"Cormorant Garamond",serif;font-weight:500;margin:0 2px}
@@ -186,6 +188,7 @@ footer .studio{font-family:"Noto Serif TC",serif;letter-spacing:.3em;color:var(-
   .card{border-radius:18px}
   .body{padding:12px 12px 14px;gap:8px}
   .name{font-size:17px}
+  .note{font-size:13px;margin-top:-4px}
   .meta{flex-direction:column;align-items:stretch;gap:8px}
   .qty{font-size:14px}
   .qty b{font-size:22px}
@@ -335,7 +338,7 @@ const DEMO_ITEMS = [
   {id:'002',type:'贈送',name:'乾燥花束（粉色系）',qty:5,photos:[demoPhoto('#fbd3dc','#f0a3b7','範例照片')]},
   {id:'003',type:'贈送',name:'喜糖小紙盒',qty:80,photos:[]},
   {id:'004',type:'贈送',name:'婚禮蠟燭杯',qty:0,photos:[]},
-  {id:'005',type:'出借',name:'迎賓木製畫架',qty:2,photos:[demoPhoto('#dccbf0','#a68bd0','範例照片 1'),demoPhoto('#e7d9f5','#b79ad9','範例照片 2')]},
+  {id:'005',type:'出借',name:'迎賓木製畫架',qty:2,note:'高約 160cm，可放 A1 海報',photos:[demoPhoto('#dccbf0','#a68bd0','範例照片 1'),demoPhoto('#e7d9f5','#b79ad9','範例照片 2')]},
   {id:'006',type:'出借',name:'金色鐵藝拱門',qty:1,photos:[]},
   {id:'007',type:'出借',name:'LED 燈串（10 米）',qty:6,photos:[]},
 ];
@@ -490,6 +493,7 @@ function card(i, z){
     '<div class="photo'+(ps.length?'':' empty')+(multi?' multi':'')+'" data-zone="'+z+'" data-id="'+esc(i.id)+'">' +
       media + '<span class="tag">'+ZONES[z]+'</span></div>' +
     '<div class="body"><h4 class="name">'+esc(i.name)+'</h4>' +
+      (i.note ? '<p class="note">'+esc(i.note)+'</p>' : '') +
       '<div class="meta"><span class="qty">'+(z==='give'?'可索取':'可借用')+'<b>'+i.qty+'</b>件</span>' +
       '<button class="pick" type="button" data-zone="'+z+'" data-id="'+esc(i.id)+'"'+(out?' disabled':'')+'>'+(out?outText:action)+'</button>' +
     '</div></div></article>';
@@ -533,7 +537,7 @@ function showLb(){
   lbIdx = (lbIdx + n) % n;
   $('img', lb).src = ps[lbIdx].replace(/sz=w\d+/, 'sz=w1600');
   $('img', lb).alt = lbItem.name;
-  $('p', lb).innerHTML = esc(lbItem.name) + (n > 1 ? '<small>' + (lbIdx+1) + ' / ' + n + '</small>' : '');
+  $('p', lb).innerHTML = esc(lbItem.name) + (lbItem.note ? '<small>' + esc(lbItem.note) + '</small>' : '') + (n > 1 ? '<small>' + (lbIdx+1) + ' / ' + n + '</small>' : '');
 }
 const closeLb = () => lb.classList.remove('open');
 lb.addEventListener('click', e => {
